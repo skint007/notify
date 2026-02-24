@@ -101,7 +101,9 @@
 
         private void RemoveAllElements()
         {
-            _registeredElements.Keys.ToList().ForEach(RemoveElement);
+            foreach (var entry in _registeredElements.Values)
+                entry.TrackedObject.Dispose();
+            _registeredElements.Clear();
         }
 
         private class TrackCount

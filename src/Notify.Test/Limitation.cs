@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming
 namespace Notify.Test
 {
+    using System.Collections.ObjectModel;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Stubs;
 
@@ -40,6 +41,33 @@ namespace Notify.Test
             Tracker.Track(dummy);
             dummy.Name = "changed";
             Assert.IsFalse(HasChange);
+        }
+
+        [TestMethod]
+        public void Should_not_track_excluded_nested_property()
+        {
+            var holder = new ExcludedPropertyHolder
+            {
+                Excluded = new ExcludedDummy()
+            };
+            Tracker.Track(holder);
+            holder.Excluded.Name = "changed";
+            Assert.IsFalse(HasChange);
+        }
+
+        [Timeout(2000)]
+        [TestMethod]
+        public void Should_handle_circular_reference_via_collection()
+        {
+            var p = new Person
+            {
+                Friends = new ObservableCollection<Person>()
+            };
+            p.Friends.Add(p);
+            Tracker.Track(p);
+
+            p.Name += "(changed)";
+            Assert.IsTrue(HasChange);
         }
     }
 }

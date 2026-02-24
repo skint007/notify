@@ -40,6 +40,15 @@ namespace Notify.Test
             Tracker.Track("string");
         }
 
+        [TestMethod]
+        public void Should_not_throw_when_disposed_twice()
+        {
+            var person = new Person();
+            var tracker = new Tracker().Track(person);
+            tracker.Dispose();
+            tracker.Dispose();
+        }
+
         #endregion
 
         #region INotifyPropertyChanged
@@ -203,6 +212,37 @@ namespace Notify.Test
         }
 
         [TestMethod]
+        public void Should_fire_for_deeply_nested_property_change()
+        {
+            var person = new Person
+            {
+                Spouse = new Person
+                {
+                    Spouse = new Person()
+                }
+            };
+            Tracker.Track(person);
+            person.Spouse.Spouse.Name += "(changed)";
+            Assert.IsTrue(HasChange);
+        }
+
+        [TestMethod]
+        public void Should_fire_when_adding_to_nested_collection()
+        {
+            var person = new Person
+            {
+                Friends = new ObservableCollection<Person>()
+            };
+            Tracker.Track(person);
+
+            person.Friends.Add(new Person());
+            Assert.IsTrue(HasChange);
+
+            person.Friends[0].Name += "(changed)";
+            Assert.IsTrue(HasChange);
+        }
+
+        [TestMethod]
         public void Should_handle_multiple_properties_pointing_to_the_same_object()
         {
             var d = new SameInstanceInPropertiesDummy();
@@ -284,6 +324,20 @@ namespace Notify.Test
             Tracker.Track(ppl);
             var p = ppl[0];
             ppl.Remove(p);
+            Assert.IsTrue(HasChange);
+
+            p.Name += "(changed)";
+            Assert.IsFalse(HasChange);
+        }
+
+        [TestMethod]
+        public void Should_not_fire_for_cleared_duplicate_elements()
+        {
+            var p = new Person();
+            var ppl = new ObservableCollection<Person> { p, p };
+            Tracker.Track(ppl);
+
+            ppl.Clear();
             Assert.IsTrue(HasChange);
 
             p.Name += "(changed)";

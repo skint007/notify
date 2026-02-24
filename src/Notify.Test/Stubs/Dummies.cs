@@ -62,6 +62,23 @@
         }
     }
 
+    class ExcludedPropertyHolder : NotifyPropertyChangedObject
+    {
+        private ExcludedDummy _excluded;
+        public ExcludedDummy Excluded
+        {
+            get { return _excluded; }
+            set
+            {
+                if (_excluded != value)
+                {
+                    _excluded = value;
+                    NotifyPropertyChanged("Excluded");
+                }
+            }
+        }
+    }
+
     class DualDummy : ObservableCollection<object>, INotifyPropertyChanged
     {
         #region INotifyPropertyChanged
