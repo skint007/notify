@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -31,6 +34,20 @@ jobs:
 
       - name: Pack
         run: dotnet pack src/Notify/Notify.csproj -c Release --no-build -p:Version=${{ steps.version.outputs.VERSION }} -o ./artifacts
+
+      - name: Publish DLL artifact
+        run: |
+          mkdir -p ./artifacts/release
+          cp src/Notify/bin/Release/net10.0/Notify.dll ./artifacts/release/
+          cp src/Notify/bin/Release/net10.0/Notify.xml ./artifacts/release/
+          cd ./artifacts/release && zip -r ../Notify.${{ steps.version.outputs.VERSION }}.zip .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./artifacts/*.nupkg
+            ./artifacts/Notify.${{ steps.version.outputs.VERSION }}.zip
 
       - name: Push to NuGet
         run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
