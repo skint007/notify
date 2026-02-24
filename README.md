@@ -9,7 +9,7 @@ A library that simplifies change tracking for `INotifyPropertyChanged` and `INot
 ## Using Notify
 Install via NuGet:
 ```
-dotnet add package Notify
+dotnet add package Notify.ChangeTracking
 ```
 
 Create a `Tracker` instance to track your objects and handle its `Changed` event:

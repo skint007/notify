@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Notify</PackageId>
+    <PackageId>Notify.ChangeTracking</PackageId>
     <Version>1.0.2</Version>
     <Authors>Buu Nguyen</Authors>
     <Description>Object change tracking library for .NET applications.</Description>
