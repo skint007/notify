@@ -1,16 +1,17 @@
-# MSBuild
-bin
-obj
+# Build output
+bin/
+obj/
 
-# MSTest
-TestResults
+# IDE
+.vs/
+*.user
+*.suo
+
+# Test results
+TestResults/
 
 # ReSharper
 _ReSharper.*
-
-# Users
-*.user
-*.suo
 
 # NuGet
 *.nupkg
