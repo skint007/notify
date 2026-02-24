@@ -15,3 +15,6 @@ _ReSharper.*
 
 # NuGet
 *.nupkg
+
+# .vscode
+.vscode/*
