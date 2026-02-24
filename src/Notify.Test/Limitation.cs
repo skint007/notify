@@ -1,12 +1,11 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 namespace Notify.Test
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Stubs;
 
     /// <summary>
-    /// This contains test cases revealing known limitations of the library.
-    /// These test cases all fail. Want to contribute? Simple, make them pass!
+    /// This contains test cases for previously known limitations that have been resolved.
     /// </summary>
     [TestClass] public class Limitation : BaseTest
     {
@@ -17,6 +16,12 @@ namespace Notify.Test
             var p = new Person { Spouse = new Person() };
             p.Spouse.Spouse = p;
             Tracker.Track(p);
+
+            p.Name += "(changed)";
+            Assert.IsTrue(HasChange);
+
+            p.Spouse.Name += "(changed)";
+            Assert.IsTrue(HasChange);
         }
 
         [TestMethod]
@@ -25,14 +30,16 @@ namespace Notify.Test
             var dummy = new IndexerDummy();
             Tracker.Track(dummy);
             dummy[0] = "see my change?";
-            Tracker.Track(dummy);
             Assert.IsTrue(HasChange);
         }
 
         [TestMethod]
         public void Should_not_fire_if_class_is_excluded()
         {
-            // well, this attribute doesn't exist yet, this test case is to remind me!
+            var dummy = new ExcludedDummy();
+            Tracker.Track(dummy);
+            dummy.Name = "changed";
+            Assert.IsFalse(HasChange);
         }
     }
 }

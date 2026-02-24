@@ -43,7 +43,7 @@
             if (objects == null || objects.Length == 0)
                 throw new ArgumentException("No object to track");
 
-            var toBeTracked = objects.Select(TrackedObject.Create).ToList();
+            var toBeTracked = objects.Select(TrackedObject.Create).Where(o => o != null).ToList();
             toBeTracked.ForEach(o => {
                 o.Changed += _ => {
                     if (Changed != null) Changed(this);

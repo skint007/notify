@@ -1,5 +1,6 @@
 ﻿namespace Notify
 {
+    using System.Collections.Generic;
     using System.Collections.Specialized;
     using System.ComponentModel;
 
@@ -17,14 +18,14 @@
         {
         }
 
-        internal override void RegisterTrackedObject()
+        internal override void RegisterTrackedObject(HashSet<object> visited)
         {
             _propertyChangedObject = new PropertyChangedTrackedObject(Tracked);
-            _propertyChangedObject.RegisterTrackedObject();
+            _propertyChangedObject.RegisterTrackedObject(visited);
             _propertyChangedObject.Changed += OnChange;
 
             _collectionChangedObject = new CollectionChangedTrackObject(Tracked);
-            _collectionChangedObject.RegisterTrackedObject();
+            _collectionChangedObject.RegisterTrackedObject(visited);
             _collectionChangedObject.Changed += OnChange;
         }
 

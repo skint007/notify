@@ -40,10 +40,10 @@
         {
         }
 
-        internal override void RegisterTrackedObject()
+        internal override void RegisterTrackedObject(HashSet<object> visited)
         {
             foreach (var element in (IEnumerable)Tracked)
-                RegisterElement(element);
+                RegisterElement(element, visited);
             ((INotifyCollectionChanged)Tracked).CollectionChanged += OnCollectionChanged;
         }
 
@@ -65,16 +65,18 @@
 
                 if (args.NewItems != null)
                     foreach (var newElement in args.NewItems)
-                        RegisterElement(newElement);
+                        RegisterElement(newElement, null);
             }
             OnChange();
         }
 
-        private void RegisterElement(object element)
+        private void RegisterElement(object element, HashSet<object> visited)
         {
             if (!IsValidObjectType(element)) return;
 
-            var trackedObject = Create(element);
+            var trackedObject = Create(element, visited);
+            if (trackedObject == null) return;
+
             if (!_registeredElements.ContainsKey(element))
             {
                 _registeredElements.Add(element, new TrackCount(trackedObject, 0));

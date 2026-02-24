@@ -32,5 +32,11 @@
             get { return _requireExplicitMarking; }
             set { _requireExplicitMarking = value; }
         }
+
+        /// <summary>
+        /// If <c>true</c>, the class is excluded from tracking entirely.
+        /// Default is <c>false</c>.
+        /// </summary>
+        public bool IsExcluded { get; set; }
     }
 }

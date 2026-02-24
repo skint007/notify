@@ -44,6 +44,24 @@
         }
     }
 
+    [TrackClass(IsExcluded = true)]
+    class ExcludedDummy : NotifyPropertyChangedObject
+    {
+        private string _name;
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    NotifyPropertyChanged("Name");
+                }
+            }
+        }
+    }
+
     class DualDummy : ObservableCollection<object>, INotifyPropertyChanged
     {
         #region INotifyPropertyChanged

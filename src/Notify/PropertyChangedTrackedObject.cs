@@ -1,4 +1,4 @@
-﻿namespace Notify
+namespace Notify
 {
     using System.Collections.Generic;
     using System.ComponentModel;
@@ -16,13 +16,13 @@
     /// <item>
     ///     <description>
     ///         Create a <see cref="TrackedObject"/> for each eligible property (see <see cref="IsEligibleProperty"/>)
-    ///         and handle its <see cref="Changed"/> event. Keep track of these properties in 
+    ///         and handle its <see cref="Changed"/> event. Keep track of these properties in
     ///         <see cref="_registeredProperties"/> so that they can be cleaned up later.
     ///     </description>
     /// </item>
     /// <item>
     ///     <description>
-    ///         If an eligible property is assigned with a new object, create a <see cref="TrackedObject"/> for 
+    ///         If an eligible property is assigned with a new object, create a <see cref="TrackedObject"/> for
     ///         the new value and listen to its <see cref="Changed"/> event; at the same time, dispose
     ///         old value in <see cref="_registeredProperties"/> so that it can be garbaged collected.
     ///     </description>
@@ -39,7 +39,7 @@
         {
         }
 
-        internal override void RegisterTrackedObject()
+        internal override void RegisterTrackedObject(HashSet<object> visited)
         {
             var attribute = GetClassAttribute(Tracked);
             var bindingFlags = GetBindingFlags(attribute);
@@ -47,8 +47,8 @@
 
             foreach (var property in properties)
                 if (IsEligibleProperty(property, attribute))
-                    RegisterProperty(Tracked, property);
-            
+                    RegisterProperty(Tracked, property, visited);
+
             ((INotifyPropertyChanged)Tracked).PropertyChanged += OnPropertyChanged;
         }
 
@@ -66,11 +66,15 @@
             var bindingFlags = GetBindingFlags(attribute);
             var property = sender.GetType().GetProperty(args.PropertyName, bindingFlags);
 
-            // The != null check is necessary because PropertyChanged might fire
-            // for property which might not be included under bindingFlags.
             if (property != null && IsEligibleProperty(property, attribute))
             {
-                RegisterProperty(sender, property);
+                RegisterProperty(sender, property, null);
+                OnChange();
+            }
+            else if (property == null)
+            {
+                // Property could not be resolved (e.g. indexer notification like "Items[i]").
+                // Still fire the change event since the object notified us of a change.
                 OnChange();
             }
         }
@@ -104,18 +108,21 @@
                    property.GetGetMethod(true).IsPublic);
         }
 
-        private void RegisterProperty(object obj, PropertyInfo property)
+        private void RegisterProperty(object obj, PropertyInfo property, HashSet<object> visited)
         {
-            // Not support indexer
+            // Skip indexer properties during initial registration
             if (property.GetIndexParameters().Length > 0) return;
 
             var propValue = property.GetValue(obj, null);
             if (IsValidObjectType(propValue))
             {
                 RemoveProperty(property.Name);
-                var trackedObject = Create(propValue);
-                _registeredProperties.Add(property.Name, trackedObject);
-                trackedObject.Changed += OnChange;
+                var trackedObject = Create(propValue, visited);
+                if (trackedObject != null)
+                {
+                    _registeredProperties.Add(property.Name, trackedObject);
+                    trackedObject.Changed += OnChange;
+                }
             }
         }
 
